@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+
+<html lang="en-us">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="format-detection" content="telephone=no"/>
+
+    <title>Demystifying Xtensa ISA | /dev/null</title>
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#FF3DB4">
+    <meta name="theme-color" content="#ffffff">
+
+    
+    
+    
+    <link rel="stylesheet" href="https://sachin0x18.github.io/css/main.min.3377ccae985b6f2af6e9e303f35bbaa80bba35b796f8de5cfc465fc41eb055d1.css"/>
+
+    
+    
+    
+    <link rel="stylesheet" href="https://sachin0x18.github.io/css/custom.min.e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.css"/>
+
+    
+    <link type="text/css" rel="stylesheet" href="/css/custom.css">
+ 
+    </head>
+
+    <body>
+        
+<nav>
+  <header>
+    <div class="site-title">
+        <a href="/">/dev/null</a>
+    </div>  
+</header>
+
+  <div class="nav-menu">
+  
+    <a class="color-link nav-link" href="/">Home</a>
+  
+    <a class="color-link nav-link" href="/archives/">Archives</a>
+  
+    <a class="color-link nav-link" href="/tags/">Tags</a>
+  
+    <a class="color-link nav-link" href="/about/">About</a>
+  
+  <a class="color-link nav-link" href="https://sachin0x18.github.io/index.xml" target="_blank" rel="noopener" type="application/rss+xml">RSS</a>
+</div>
+<footer class="footer">
+	<div class="social-icons">
+        
+    <a class="social-icon" href="mailto:sachin.parekh1811@gmail.com" target="_blank" rel="noopener" title="Email">
+        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+            <path d="M25.2794292,5.59128519 L14,16.8707144 L2.72057081,5.59128519 C3.06733103,5.30237414 3.51336915,5.12857603 4,5.12857603 L24,5.12857603 C24.4866308,5.12857603 24.932669,5.30237414 25.2794292,5.59128519 Z M25.9956978,6.99633695 C25.998551,7.04004843 26,7.08414302 26,7.12857603 L26,20.871424 C26,21.0798433 25.9681197,21.2808166 25.9089697,21.4697335 L18.7156355,14.2763993 L25.9956978,6.99633695 Z M24.9498374,22.6319215 C24.6672737,22.7846939 24.3437653,22.871424 24,22.871424 L4,22.871424 C3.5268522,22.871424 3.09207889,22.7071233 2.74962118,22.432463 L10.0950247,15.0870594 L13.9848068,18.9768415 L14.1878486,18.7737996 L14.2030419,18.7889929 L17.6549753,15.3370594 L24.9498374,22.6319215 Z M2.00810114,21.0526627 C2.00273908,20.9929669 2,20.9325153 2,20.871424 L2,7.12857603 C2,7.08414302 2.00144896,7.04004843 2.00430222,6.99633695 L9.03436454,14.0263993 L2.00810114,21.0526627 Z"></path>
+        </svg>
+    </a>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <a class="social-icon" href="https://github.com/sachin0x18" target="_blank" rel="noopener" title="GitHub">
+        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+            <path d="M13.9988029,1.32087331 C6.82105037,1.32087331 1,7.14112562 1,14.3212723 C1,20.0649109 4.72454649,24.9370678 9.89038951,26.6560892 C10.5408085,26.7757983 10.7778323,26.374374 10.7778323,26.0296121 C10.7778323,25.7215609 10.7666595,24.9035493 10.760275,23.8189856 C7.14426471,24.6042767 6.38131925,22.0760223 6.38131925,22.0760223 C5.78995672,20.5740732 4.93762853,20.1742451 4.93762853,20.1742451 C3.75729765,19.3682044 5.02701126,19.3841656 5.02701126,19.3841656 C6.33183953,19.4759425 7.01817121,20.7241085 7.01817121,20.7241085 C8.17775254,22.7104801 10.0611744,22.1366749 10.8017741,21.8038838 C10.919887,20.9643246 11.2558703,20.3913175 11.6269683,20.066507 C8.74038491,19.7385043 5.70536235,18.6228163 5.70536235,13.6413251 C5.70536235,12.2223743 6.21213051,11.0611968 7.04370914,10.1530044 C6.90963504,9.82420367 6.46351945,8.50181809 7.17139875,6.71256734 C7.17139875,6.71256734 8.26234691,6.36301702 10.7459099,8.04532771 C11.78259,7.75642995 12.8950858,7.61277914 14.000399,7.60719272 C15.1049142,7.61277914 16.2166119,7.75642995 17.2548881,8.04532771 C19.736855,6.36301702 20.8262071,6.71256734 20.8262071,6.71256734 C21.5356825,8.50181809 21.0895669,9.82420367 20.9562909,10.1530044 C21.7894656,11.0611968 22.2922435,12.2223743 22.2922435,13.6413251 C22.2922435,18.6355852 19.2524325,19.734514 16.3570705,20.0561322 C16.8231376,20.4575564 17.2389269,21.2508282 17.2389269,22.4638795 C17.2389269,24.2012564 17.2229657,25.603448 17.2229657,26.0296121 C17.2229657,26.3775663 17.4575954,26.7821827 18.116793,26.6552912 C23.2786458,24.9322794 27,20.0633148 27,14.3212723 C27,7.14112562 21.1789496,1.32087331 13.9988029,1.32087331"></path>
+        </svg>
+    </a>
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+</div>
+
+
+
+
+	<p><a href="https://github.com/kimcc/hugo-theme-noteworthy" target="_blank" rel="noopener">Noteworthy theme</a></p>
+	<p><a href="https://gohugo.io" target="_blank" rel="noopener">Built with Hugo</a></p>
+
+	<script src="https://sachin0x18.github.io/js/main.min.fa5c2b23e07b5d9bfad267a52b4b24fdb053e6fb7524993383594926a3ac270c.js" integrity="sha256-+lwrI+B7XZv60melK0sk/bBT5vt1JJkzg1lJJqOsJww=" crossorigin="anonymous"></script>
+</footer>
+<p class="copyright"><a style='text-decoration: none; color: #ababab; 'rel='license' href='http://creativecommons.org/licenses/by/4.0/'> © sachin0x18 2020 </a></p>
+</nav>
+
+        <div id="content" class="content-container">
+        
+
+<h1 class="post-title">Demystifying Xtensa ISA</h1>
+    
+    <time>May 5, 2020</time>
+    
+    <div>
+        <p>
+        
+
+<p><a href="https://en.wikipedia.org/wiki/Instruction_set_architecture">Instruction Set Architecture</a> (ISA) is considered to be esoteric even among software developers. I feel it&rsquo;s because majority of the developers don&rsquo;t even need to look at, let alone write code in assembly language (a language that has a direct correspondence to the ISA). It isn&rsquo;t their fault either, the compiler does the heavy lifting of converting the higher level language (generally ISA-agnostic) into its assembly equivalent.</p>
+
+<p>While the compiler does a great job in generating an (nearly) optimal assembly code, hand written assembly code dominates when programming performance critical routines, time critical interrupt handlers or interacting directly with the hardware. Certain architectures have some special DSP/MAC instructions that the compiler is unaware of, so DSP algorithms are also partially developed in assembly. Having a knowledge of the underlying architecture can, at times, help maximize the performance.</p>
+
+<blockquote>
+<p>Real programmers wrote in machine code<sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup></p>
+</blockquote>
+
+<p>In this post, I will be covering certain sections of Xtensa ISA, specifically windowed registers, calling convention and stack layout.</p>
+
+<h2 id="overview-of-xtensa">Overview of Xtensa:</h2>
+
+<hr />
+
+<p>Xtensa is a post-RISC ISA<sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> i.e it derives most of its features from <a href="https://en.wikipedia.org/wiki/Reduced_instruction_set_computer">RISC</a> but also incorporates certain features where <a href="https://en.wikipedia.org/wiki/Complex_instruction_set_computer">CISC</a> is advantageous. Xtensa has 24-bit instructions (few are even 16 bits!), unlike the conventional 32-bit instructions, to have code compactness.</p>
+
+<h4 id="registers">Registers:</h4>
+
+<p>PC = Program Counter <br>
+AR = General purpose registers <br>
+SAR = Shifts and the Shift Amount Register</p>
+
+<p>PC essentially holds the address which is going to be executed.</p>
+
+<p>AR is general purpose registers, there are 64 32-bit registers however only 16 of them are visible/accessible at a time. This is windowed register.</p>
+
+<p>SAR register holds the shift amount required for shift instructions (logical left, logical right). Xtensa does not provide single-instruction shifts in which the shift amount is in general register (ar) operand. The shift amount is in SAR register.</p>
+
+<h2 id="windowed-register">Windowed Register:</h2>
+
+<hr />
+
+<p><a href="https://en.wikipedia.org/wiki/Processor_register">General purpose registers</a> (GPR) are used to store data temporarily for CPU while performing various operations. These registers are blazing fast but are limited in number (8 ~ 32).</p>
+
+<p>Typically, the number of registers present in the <a href="https://en.wikipedia.org/wiki/Register_file">register file</a> are equal to the registers <em>directly</em> accessible by the core. The Xtensa core can only access 16 GPR, namely <code>a0</code> - <code>a15</code>. So the register file contains 16 registers.</p>
+
+<p>Xtensa also has a Windowed register option, which when enabled, extends this register file to contain 64 registers. Essentially, the register frame (a0 - a15) acts as a window, through which only 16 registers are visible, that slides on this large register file having 64 registers. And hence the name: Windowed register.</p>
+
+<p>Which 16 registers are visible is controlled by the <code>WindowBase</code> register. WindowBase register indicates where the window starts in the register file. Also, the shifting/rotation of this window occurs in units of 4. That means, the window starts at <strong><code>(WindowBase x 4)</code></strong><sup><strong>th</strong></sup> position in the register file</p>
+
+<p><img src="/img/Windowed_register.png" alt="Windowed register" />
+<figcaption> <em>Fig 1. Register window</em> </figcaption></p>
+
+<p>So&hellip;how is this helpful ?</p>
+
+<p>The answer lies in function calls and for that we will have to understand the calling convention.</p>
+
+<h2 id="calling-convention">Calling convention:</h2>
+
+<hr />
+
+<p>Applications are often broken down into various functions/subroutines for reusability, maintainability and scaleability. Each subroutine can have its own set of arguments, local variables and a return type. In practice, there are many such subroutines and nested subroutines, so how should we pass arguments to a subroutine ? What happens to the parameters/context of the caller subroutine ? <br>
+To answer these questions and various other questions, the architecture defines an <a href="https://en.wikipedia.org/wiki/Application_binary_interface">application binary interface (ABI)</a> which also includes the calling convention.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Calling_convention">Calling convention</a> is basically a set of protocol that delineates how arguments are passed to a function, how the stack is managed inside the function, how is data returned to the caller and some more intricacies.</p>
+
+<p>Xtensa supports two different ABIs.<br>
+1. Windowed register ABI <br>
+2. Call0 ABI</p>
+
+<p>I will cover only Windowed register ABI.</p>
+
+<h3 id="windowed-register-calling-convention">Windowed register calling convention:</h3>
+
+<p>Return address is stored in <code>a0</code> and the stack pointer is store in <code>a1</code></p>
+
+<p>Arguments to the functions are passed in both, registers and memory (stack). The first six arguments are passed in the registers and remaining go on the stack.</p>
+
+<p>As for return values, they are returned in registers beginning from <code>a2</code> till <code>a5</code>. If there are more than 4 values to be returned, the caller passes a pointer which is then populated by callee with all the return values.</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">Register</th>
+<th align="center">Use</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center">a0</td>
+<td align="center">Return address</td>
+</tr>
+
+<tr>
+<td align="center">a1</td>
+<td align="center">Stack pointer</td>
+</tr>
+
+<tr>
+<td align="center">a2 - a7</td>
+<td align="center">Incoming arguments</td>
+</tr>
+</tbody>
+</table>
+
+<p>In Xtensa, subroutine calls are initiated using <code>CALLN</code> and <code>CALLXN</code> instructions. N is the windowed register option that specifies the amount by which the register window needs to be rotated for the callee. N can take values from 0, 4, 8 and 12. (call0/callx0 does not follow windowed register convention so further explanation does not apply for N = 0)</p>
+
+<p>What does &ldquo;rotation of window for the callee&rdquo; exactly mean ?</p>
+
+<p>When a subroutine is called using callN/callxN, WindowBase register is incremented by (N/4), so the registers visible when inside callee, through the window, would be different from caller because the register frame (a0 - a15) would have moved.</p>
+
+<p>In general, for a windowed register call <code>callN</code>/<code>callxN</code></p>
+
+<pre><code>aN of caller will be a0 of callee
+a(N+1) of caller will be a1 of callee and so on…
+</code></pre>
+
+<p>So the caller needs to put the first argument of the callee in a(N+2), second in a(N+3) and so on..</p>
+
+<p>While returning from the callee function, WindowBase register is decremented by (N/4) to keep the caller function registers same.</p>
+
+<p>Let&rsquo;s take an example:</p>
+
+<pre><code>/*
+ * void func(a,b)
+ * {
+ *     ...
+ *     foo = bar(x,y);
+ *     ...
+ * }
+ */
+
+func:
+    ...
+    mov         a10, x    // a10 is bar’s a2
+    mov         a11, y    // a11 is bar’s a3
+    call8       bar	
+    mov         foo, a10  // a10 is bar’s a2 (return value)
+    ...
+</code></pre>
+
+<p>Do you see the advantage of using windowed registers ? <br>
+When a function calls another function, it does not have to store its own arguments somewhere else to accomodate the arguments for the callee since the arguments of the callee is at a different <em>physical</em> location. The callee function internally will still use <code>a2</code> to access its first argument but as you can see, <code>a2</code> of the caller is at a different physical location than <code>a2</code> of callee. If there was no windowing and the number of physical registers would be exactly 16 then <code>a2</code> of caller and callee would be same. Thus for each function call, the data in these registers would have to be stored at some other memory location (stack) before calling any function and restore again after returning.</p>
+
+<p>Accessing any memory location, other than register, is very slow and as a result this saving/restoring will have a negative impact on performance. So using windowed register convention saves us the overhead of such stores/restores and also reduces the code size.</p>
+
+<p>With that said, few questions pop up in my head</p>
+
+<ul>
+<li>What happens when there is a function that calls another function that calls another and so on such that the window keeps on rotating and wraps around pointing to the first function&rsquo;s frame ?</li>
+<li>Does it overwrite the data and corrupt the first function’s data ?</li>
+<li>If not, then where is the first function&rsquo;s data stored ?</li>
+</ul>
+
+<p>When the program tries to write to a register that already has the data of one of the parent routine, a window overflow exception is generated and it&rsquo;s the responsibilty of the window overflow exception handler to ensure that the data in the overlapped registers is saved on the stack before it gets overwritten.</p>
+
+<p>And where exactly is the data in these registers stored on the stack ?</p>
+
+<p>For that, let&rsquo;s see how the stack is laid out.</p>
+
+<h2 id="stack-layout">Stack Layout:</h2>
+
+<hr />
+
+<p>As mentioned, the stack pointer resides in <code>a1</code> register. This stack pointer always points to the <strong>bottom</strong> of the stack!<br></p>
+
+<p>Usually, <a href="https://en.wikipedia.org/wiki/Function_prologue">function prologue</a> sets up the stack for a function.</p>
+
+<p>In Xtensa, <code>ENTRY</code> instruction is the function prologue</p>
+
+<p>ENTRY instruction primarily does two things: <br>
+1. Allocates the stack frame for the function and sets the stack pointer. <br>
+2. Moves/rotates the register window by n as specified in the calln/callxn instruction.</p>
+
+<p>Stack layout is always better explained through an illustration</p>
+
+<p><img src="/img/Stack_layout.png" alt="Windowed ABI stack layout" />
+<figcaption> <em>Fig 2. Windowed ABI stack layout</em> </figcaption></p>
+
+<blockquote>
+<p>For clarity, I will use sp as stack pointer instead of a1.</p>
+</blockquote>
+
+<p>Like most architectures, in Xtensa too, stack grows downwards. If there are outgoing arguments, apart from the first 6 arguments, then they will go on the positive offset from sp. i.e 7th argument on <code>sp</code>, 8th on <code>sp + 4</code> and so on. Above the outgoing arguments, local variables of that function are stored.</p>
+
+<p>The region underneath the stack pointer, called <code>Base Save Area</code>, is of 16 bytes and reserved for saving the <code>a0</code> - <code>a3</code> of the caller (previous frame) when the window overflow exception occurs. If more registers of the caller are required to be saved then it is stored in the <code>Extra Save Area</code> at the top of the caller (previous) stack frame. The location of saving registers of the caller (i-1) frame is highlighed in the image.</p>
+
+<p>With all the necessary points covered, let&rsquo;s take an example and connect all the dots.</p>
+
+<p>Suppose, each function call is carried out using <code>call8</code> and we start with WindowBase = 4</p>
+
+<p>Function A calls B, B calls C, C calls D&hellip; till I <br>
+i.e</p>
+
+<pre><code>Functions:  A -&gt; B -&gt; C -&gt; D -&gt; E -&gt; F -&gt; G -&gt; H -&gt; I
+WindowBase: 4    6    8    10   12   14   0    2    4
+</code></pre>
+
+<p>On each function call, the WindowBase will be incremented by 2 because <code>call8</code> is used.</p>
+
+<p>No. of bits in WindowBase register = log<sub>2</sub>((No. of registers in register file)/4) = log<sub>2</sub>(<sup>64</sup>&frasl;<sub>4</sub>) = 4. Thus the max value of WindowBase is 15.</p>
+
+<p>As you have noticed, on the 9th function call the window wraps around to a point where the frame contains the data of a parent function, i.e <code>a0</code>,<code>a1</code>.. contains data of <strong>A</strong>. It implies that <code>a8</code>,<code>a9</code>.. of <strong>H</strong> are <code>a0</code>,<code>a1</code>.. of <strong>A</strong>.</p>
+
+<p>A window overflow exception will be generated when <strong>H</strong> tries to modify <code>a8</code>,<code>a9</code>.. since it originally contains the context of <strong>A</strong>, so these must be saved to accommodate arguments of <strong>I</strong>. At this point, in the window overflow exception handler we must rotate the register window to frame <strong>A</strong> (<code>WindowBase = 4</code>).</p>
+
+<ul>
+<li><code>a0</code> - <code>a3</code> are stored in the <code>Base Save Area</code> of <strong>B</strong>&rsquo;s stack frame. <strong>B</strong>&rsquo;s stack frame is accessible since <code>a9</code> is <code>a1</code> of <strong>B</strong>, which is <strong>B</strong>&rsquo;s stack pointer.</li>
+<li><code>a4</code> - <code>a7</code> are stored in the <code>Extra Save Area</code> of <strong>A</strong>&rsquo;s stack frame.</li>
+</ul>
+
+<p>Now whenever <strong>B</strong> returns, window underflow exception will be generated and we need to make sure that the corresponding exception handler would restore these values back into the registers.</p>
+
+<p>I hope now you have some basic understanding of the Xtensa ISA, especially the windowed register ABI. There are some aspects of the windowed register ABI which I have simplified. If you want to delve deeper, refer to the Xtensa ISA reference manual.</p>
+
+<p>Thanks for reading!</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:1"><a href="https://www.cs.utah.edu/~elb/folklore/mel-annotated/node1.html#SECTION00010000000000000000">The Story of Mel</a>
+ <a class="footnote-return" href="#fnref:1"><sup>↩</sup></a></li>
+<li id="fn:2"><a href="https://0x04.net/~mwk/doc/xtensa.pdf">Xtensa ISA: Reference Manual</a>
+ <a class="footnote-return" href="#fnref:2"><sup>↩</sup></a></li>
+</ol>
+</div>
+
+        </p>
+    </div>
+    
+
+    
+
+    <div class="page-footer">
+        
+        <hr class="footer-divider">
+        
+            <a class="tag" href="/tags/xtensa">#Xtensa</a>
+        
+            <a class="tag" href="/tags/isa">#ISA</a>
+        
+            <a class="tag" href="/tags/windowed-register">#Windowed register</a>
+        
+            <a class="tag" href="/tags/calling-convention">#Calling convention</a>
+        
+            <a class="tag" href="/tags/espressif">#Espressif</a>
+        
+      
+    </div>
+
+
+        
+
+<link rel="stylesheet" type="text/css" href="/css/katex.min.css" crossorigin="anonymous">
+<script type="text/javascript" src="/js/katex.min.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/js/auto-render.min.js"onload="renderMathInElement(document.body);" crossorigin="anonymous"></script>
+
+        </div>
+        <footer class="footer-mobile">
+	<div class="social-icons">
+        
+    <a class="social-icon" href="mailto:sachin.parekh1811@gmail.com" target="_blank" rel="noopener" title="Email">
+        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+            <path d="M25.2794292,5.59128519 L14,16.8707144 L2.72057081,5.59128519 C3.06733103,5.30237414 3.51336915,5.12857603 4,5.12857603 L24,5.12857603 C24.4866308,5.12857603 24.932669,5.30237414 25.2794292,5.59128519 Z M25.9956978,6.99633695 C25.998551,7.04004843 26,7.08414302 26,7.12857603 L26,20.871424 C26,21.0798433 25.9681197,21.2808166 25.9089697,21.4697335 L18.7156355,14.2763993 L25.9956978,6.99633695 Z M24.9498374,22.6319215 C24.6672737,22.7846939 24.3437653,22.871424 24,22.871424 L4,22.871424 C3.5268522,22.871424 3.09207889,22.7071233 2.74962118,22.432463 L10.0950247,15.0870594 L13.9848068,18.9768415 L14.1878486,18.7737996 L14.2030419,18.7889929 L17.6549753,15.3370594 L24.9498374,22.6319215 Z M2.00810114,21.0526627 C2.00273908,20.9929669 2,20.9325153 2,20.871424 L2,7.12857603 C2,7.08414302 2.00144896,7.04004843 2.00430222,6.99633695 L9.03436454,14.0263993 L2.00810114,21.0526627 Z"></path>
+        </svg>
+    </a>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    <a class="social-icon" href="https://github.com/sachin0x18" target="_blank" rel="noopener" title="GitHub">
+        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+            <path d="M13.9988029,1.32087331 C6.82105037,1.32087331 1,7.14112562 1,14.3212723 C1,20.0649109 4.72454649,24.9370678 9.89038951,26.6560892 C10.5408085,26.7757983 10.7778323,26.374374 10.7778323,26.0296121 C10.7778323,25.7215609 10.7666595,24.9035493 10.760275,23.8189856 C7.14426471,24.6042767 6.38131925,22.0760223 6.38131925,22.0760223 C5.78995672,20.5740732 4.93762853,20.1742451 4.93762853,20.1742451 C3.75729765,19.3682044 5.02701126,19.3841656 5.02701126,19.3841656 C6.33183953,19.4759425 7.01817121,20.7241085 7.01817121,20.7241085 C8.17775254,22.7104801 10.0611744,22.1366749 10.8017741,21.8038838 C10.919887,20.9643246 11.2558703,20.3913175 11.6269683,20.066507 C8.74038491,19.7385043 5.70536235,18.6228163 5.70536235,13.6413251 C5.70536235,12.2223743 6.21213051,11.0611968 7.04370914,10.1530044 C6.90963504,9.82420367 6.46351945,8.50181809 7.17139875,6.71256734 C7.17139875,6.71256734 8.26234691,6.36301702 10.7459099,8.04532771 C11.78259,7.75642995 12.8950858,7.61277914 14.000399,7.60719272 C15.1049142,7.61277914 16.2166119,7.75642995 17.2548881,8.04532771 C19.736855,6.36301702 20.8262071,6.71256734 20.8262071,6.71256734 C21.5356825,8.50181809 21.0895669,9.82420367 20.9562909,10.1530044 C21.7894656,11.0611968 22.2922435,12.2223743 22.2922435,13.6413251 C22.2922435,18.6355852 19.2524325,19.734514 16.3570705,20.0561322 C16.8231376,20.4575564 17.2389269,21.2508282 17.2389269,22.4638795 C17.2389269,24.2012564 17.2229657,25.603448 17.2229657,26.0296121 C17.2229657,26.3775663 17.4575954,26.7821827 18.116793,26.6552912 C23.2786458,24.9322794 27,20.0633148 27,14.3212723 C27,7.14112562 21.1789496,1.32087331 13.9988029,1.32087331"></path>
+        </svg>
+    </a>
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+</div>
+
+
+
+
+	<div class="footer-mobile-links">
+		<p><a href="https://github.com/kimcc/hugo-theme-noteworthy" target="_blank" rel="noopener">Noteworthy theme</a></p>
+		<span class="divider-bar">|</span>
+		<p><a href="https://gohugo.io" target="_blank" rel="noopener">Built with Hugo</a></p>
+	</div>
+
+	<script src="https://sachin0x18.github.io/js/main.min.fa5c2b23e07b5d9bfad267a52b4b24fdb053e6fb7524993383594926a3ac270c.js" integrity="sha256-+lwrI+B7XZv60melK0sk/bBT5vt1JJkzg1lJJqOsJww=" crossorigin="anonymous"></script>
+</footer>
+    </body>
+</html>

@@ -1,0 +1,78 @@
+#content img {
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    display: flex;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    max-width: 90%;
+}
+
+figcaption {
+  text-align: center;
+}
+
+pre {
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+.table-wrapper table {
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    margin-bottom: 15px;
+}
+
+.table-wrapper table thead {
+    background: #e8e8e8;
+}
+
+.table-wrapper table th,
+.table-wrapper table td {
+    padding: .5em 1em;
+    border: 1px double #1e1e1e;
+}
+
+p code,
+kbd {
+    font-size: .95rem;
+    background: #ebebeb;
+    padding: .2em;
+}
+
+li code,
+kbd {
+    font-size: .95rem;
+    background: #ebebeb;
+    padding: .2em;
+}
+
+nav {
+    overflow: auto;
+    border-right: solid 1px #d5d5d5;
+}
+
+h6 {
+    margin: -1em 0 .75em;
+    text-align: center;
+}
+
+p img:not(:only-of-type) {
+    width: 33%;
+    float: left;
+}
+
+.copyright {
+     position: absolute;
+     bottom: 0;
+     left: -1.5em;
+     width: 100%;
+     text-align: center;
+     font-size:0.8em;
+}
