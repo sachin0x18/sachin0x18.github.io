@@ -1,264 +1,142 @@
-<!DOCTYPE html>
-
-<html lang="en-us">
-    <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="format-detection" content="telephone=no"/>
-
-    <title>Demystifying Xtensa ISA | /dev/null</title>
-    
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#FF3DB4">
-    <meta name="theme-color" content="#ffffff">
-
-    
-    
-    
-    <link rel="stylesheet" href="https://sachin0x18.github.io/css/main.min.3377ccae985b6f2af6e9e303f35bbaa80bba35b796f8de5cfc465fc41eb055d1.css"/>
-
-    
-    
-    
-    <link rel="stylesheet" href="https://sachin0x18.github.io/css/custom.min.e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.css"/>
-
-    
-    <link type="text/css" rel="stylesheet" href="/css/custom.css">
- 
-    </head>
-
-    <body>
-        
-<nav>
-  <header>
-    <div class="site-title">
-        <a href="/">/dev/null</a>
-    </div>  
-</header>
-
-  <div class="nav-menu">
-  
-    <a class="color-link nav-link" href="/">Home</a>
-  
-    <a class="color-link nav-link" href="/archives/">Archives</a>
-  
-    <a class="color-link nav-link" href="/tags/">Tags</a>
-  
-    <a class="color-link nav-link" href="/about/">About</a>
-  
-  <a class="color-link nav-link" href="https://sachin0x18.github.io/index.xml" target="_blank" rel="noopener" type="application/rss+xml">RSS</a>
+<!doctype html><html lang=en dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>Demystifying Xtensa ISA | /dev/null</title>
+<meta name=keywords content="Xtensa,ISA,Windowed register,Calling convention,Espressif">
+<meta name=description content="Espressif employs Xtensa processor in its chips and although these chips are ubiquitous in the IoT domain, there aren&rsquo;t many blogs/articles talking about the Xtensa ISA. So I decided to write and explain few aspects of the architecture.">
+<meta name=author content="sachin0x18">
+<link rel=canonical href=https://sachin0x18.github.io/posts/demystifying-xtensa-isa/>
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.e53dbe94a61bf4f617babb4aac1305f19f971a9a8019ce7ce2056f63cece697e.css integrity="sha256-5T2+lKYb9PYXurtKrBMF8Z+XGpqAGc584gVvY87OaX4=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=https://sachin0x18.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=https://sachin0x18.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=https://sachin0x18.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=https://sachin0x18.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=https://sachin0x18.github.io/safari-pinned-tab.svg>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PNVJ8Z53RH"></script>
+<script>var dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes";if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','G-PNVJ8Z53RH',{anonymize_ip:!0})}</script>
+<meta property="og:title" content="Demystifying Xtensa ISA">
+<meta property="og:description" content="Espressif employs Xtensa processor in its chips and although these chips are ubiquitous in the IoT domain, there aren&rsquo;t many blogs/articles talking about the Xtensa ISA. So I decided to write and explain few aspects of the architecture.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://sachin0x18.github.io/posts/demystifying-xtensa-isa/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2020-05-05T00:00:01+00:00">
+<meta property="article:modified_time" content="2020-05-05T00:00:01+00:00"><meta property="og:site_name" content="/dev/null">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Demystifying Xtensa ISA">
+<meta name=twitter:description content="Espressif employs Xtensa processor in its chips and although these chips are ubiquitous in the IoT domain, there aren&rsquo;t many blogs/articles talking about the Xtensa ISA. So I decided to write and explain few aspects of the architecture.">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://sachin0x18.github.io/posts/"},{"@type":"ListItem","position":2,"name":"Demystifying Xtensa ISA","item":"https://sachin0x18.github.io/posts/demystifying-xtensa-isa/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Demystifying Xtensa ISA","name":"Demystifying Xtensa ISA","description":"Espressif employs Xtensa processor in its chips and although these chips are ubiquitous in the IoT domain, there aren\u0026rsquo;t many blogs/articles talking about the Xtensa ISA. So I decided to write and explain few aspects of the architecture.","keywords":["Xtensa","ISA","Windowed register","Calling convention","Espressif"],"articleBody":"Instruction Set Architecture (ISA) is considered to be esoteric even among software developers. I feel it’s because majority of the developers don’t even need to look at, let alone write code in assembly language (a language that has a direct correspondence to the ISA). It isn’t their fault either, the compiler does the heavy lifting of converting the higher level language (generally ISA-agnostic) into its assembly equivalent.\nWhile the compiler does a great job in generating an (nearly) optimal assembly code, hand written assembly code dominates when programming performance critical routines, time critical interrupt handlers or interacting directly with the hardware. Certain architectures have some special DSP/MAC instructions that the compiler is unaware of, so DSP algorithms are also partially developed in assembly. Having a knowledge of the underlying architecture can, at times, help maximize the performance.\n Real programmers wrote in machine code1\n In this post, I will be covering certain sections of Xtensa ISA, specifically windowed registers, calling convention and stack layout.\nOverview of Xtensa:  Xtensa is a post-RISC ISA2 i.e it derives most of its features from RISC but also incorporates certain features where CISC is advantageous. Xtensa has 24-bit instructions (few are even 16 bits!), unlike the conventional 32-bit instructions, to have code compactness.\nRegisters: PC = Program Counter\nAR = General purpose registers\nSAR = Shifts and the Shift Amount Register\nPC essentially holds the address which is going to be executed.\nAR is general purpose registers, there are 64 32-bit registers however only 16 of them are visible/accessible at a time. This is windowed register.\nSAR register holds the shift amount required for shift instructions (logical left, logical right). Xtensa does not provide single-instruction shifts in which the shift amount is in general register (ar) operand. The shift amount is in SAR register.\nWindowed Register:  General purpose registers (GPR) are used to store data temporarily for CPU while performing various operations. These registers are blazing fast but are limited in number (8 ~ 32).\nTypically, the number of registers present in the register file are equal to the registers directly accessible by the core. The Xtensa core can only access 16 GPR, namely a0 - a15. So the register file contains 16 registers.\nXtensa also has a Windowed register option, which when enabled, extends this register file to contain 64 registers. Essentially, the register frame (a0 - a15) acts as a window, through which only 16 registers are visible, that slides on this large register file having 64 registers. And hence the name: Windowed register.\nWhich 16 registers are visible is controlled by the WindowBase register. WindowBase register indicates where the window starts in the register file. Also, the shifting/rotation of this window occurs in units of 4. That means, the window starts at (WindowBase x 4)thposition in the register file\nSo…how is this helpful ?\nThe answer lies in function calls and for that we will have to understand the calling convention.\nCalling convention:  Applications are often broken down into various functions/subroutines for reusability, maintainability and scaleability. Each subroutine can have its own set of arguments, local variables and a return type. In practice, there are many such subroutines and nested subroutines, so how should we pass arguments to a subroutine ? What happens to the parameters/context of the caller subroutine ? To answer these questions and various other questions, the architecture defines an application binary interface (ABI) which also includes the calling convention.\nCalling convention is basically a set of protocol that delineates how arguments are passed to a function, how the stack is managed inside the function, how is data returned to the caller and some more intricacies.\nXtensa supports two different ABIs. Windowed register ABI  Call0 ABI  I will cover only Windowed register ABI.\nWindowed register calling convention: Return address is stored in a0 and the stack pointer is store in a1\nArguments to the functions are passed in both, registers and memory (stack). The first six arguments are passed in the registers and remaining go on the stack.\nAs for return values, they are returned in registers beginning from a2 till a5. If there are more than 4 values to be returned, the caller passes a pointer which is then populated by callee with all the return values.\n   Register Use     a0 Return address   a1 Stack pointer   a2 - a7 Incoming arguments    In Xtensa, subroutine calls are initiated using CALLN and CALLXN instructions. N is the windowed register option that specifies the amount by which the register window needs to be rotated for the callee. N can take values from 0, 4, 8 and 12. (call0/callx0 does not follow windowed register convention so further explanation does not apply for N = 0)\nWhat does “rotation of window for the callee” exactly mean ?\nWhen a subroutine is called using callN/callxN, WindowBase register is incremented by (N/4), so the registers visible when inside callee, through the window, would be different from caller because the register frame (a0 - a15) would have moved.\nIn general, for a windowed register call callN/callxN\naN of caller will be a0 of callee a(N+1) of caller will be a1 of callee and so on… So the caller needs to put the first argument of the callee in a(N+2), second in a(N+3) and so on..\nWhile returning from the callee function, WindowBase register is decremented by (N/4) to keep the caller function registers same.\nLet’s take an example:\n/* * void func(a,b) * { * ... * foo = bar(x,y); * ... * } */ func: ... mov a10, x // a10 is bar’s a2 mov a11, y // a11 is bar’s a3 call8 bar\tmov foo, a10 // a10 is bar’s a2 (return value) ... Do you see the advantage of using windowed registers ? When a function calls another function, it does not have to store its own arguments somewhere else to accomodate the arguments for the callee since the arguments of the callee is at a different physical location. The callee function internally will still use a2 to access its first argument but as you can see, a2 of the caller is at a different physical location than a2 of callee. If there was no windowing and the number of physical registers would be exactly 16 then a2 of caller and callee would be same. Thus for each function call, the data in these registers would have to be stored at some other memory location (stack) before calling any function and restore again after returning.\nAccessing any memory location, other than register, is very slow and as a result this saving/restoring will have a negative impact on performance. So using windowed register convention saves us the overhead of such stores/restores and also reduces the code size.\nWith that said, few questions pop up in my head\n What happens when there is a function that calls another function that calls another and so on such that the window keeps on rotating and wraps around pointing to the first function’s frame ? Does it overwrite the data and corrupt the first function’s data ? If not, then where is the first function’s data stored ?  When the program tries to write to a register that already has the data of one of the parent routine, a window overflow exception is generated and it’s the responsibilty of the window overflow exception handler to ensure that the data in the overlapped registers is saved on the stack before it gets overwritten.\nAnd where exactly is the data in these registers stored on the stack ?\nFor that, let’s see how the stack is laid out.\nStack Layout:  As mentioned, the stack pointer resides in a1 register. This stack pointer always points to the bottom of the stack!Usually, function prologue sets up the stack for a function.\nIn Xtensa, ENTRY instruction is the function prologue\nENTRY instruction primarily does two things:  Allocates the stack frame for the function and sets the stack pointer.  Moves/rotates the register window by n as specified in the calln/callxn instruction.  Stack layout is always better explained through an illustration\n For clarity, I will use sp as stack pointer instead of a1.\n Like most architectures, in Xtensa too, stack grows downwards. If there are outgoing arguments, apart from the first 6 arguments, then they will go on the positive offset from sp. i.e 7th argument on sp, 8th on sp + 4 and so on. Above the outgoing arguments, local variables of that function are stored.\nThe region underneath the stack pointer, called Base Save Area, is of 16 bytes and reserved for saving the a0 - a3 of the caller (previous frame) when the window overflow exception occurs. If more registers of the caller are required to be saved then it is stored in the Extra Save Area at the top of the caller (previous) stack frame. The location of saving registers of the caller (i-1) frame is highlighed in the image.\nWith all the necessary points covered, let’s take an example and connect all the dots.\nSuppose, each function call is carried out using call8 and we start with WindowBase = 4\nFunction A calls B, B calls C, C calls D… till I i.e\nFunctions: A - B - C - D - E - F - G - H - I WindowBase: 4 6 8 10 12 14 0 2 4 On each function call, the WindowBase will be incremented by 2 because call8 is used.\nNo. of bits in WindowBase register = log2((No. of registers in register file)/4) = log2(64/4) = 4. Thus the max value of WindowBase is 15.\nAs you have noticed, on the 9th function call the window wraps around to a point where the frame contains the data of a parent function, i.e a0,a1.. contains data of A. It implies that a8,a9.. of H are a0,a1.. of A.\nA window overflow exception will be generated when H tries to modify a8,a9.. since it originally contains the context of A, so these must be saved to accommodate arguments of I. At this point, in the window overflow exception handler we must rotate the register window to frame A (WindowBase = 4).\n a0 - a3 are stored in the Base Save Area of B’s stack frame. B’s stack frame is accessible since a9 is a1 of B, which is B’s stack pointer. a4 - a7 are stored in the Extra Save Area of A’s stack frame.  Now whenever B returns, window underflow exception will be generated and we need to make sure that the corresponding exception handler would restore these values back into the registers.\nI hope now you have some basic understanding of the Xtensa ISA, especially the windowed register ABI. There are some aspects of the windowed register ABI which I have simplified. If you want to delve deeper, refer to the Xtensa ISA reference manual.\nThanks for reading!\n  The Story of Mel ↩︎\n Xtensa ISA: Reference Manual ↩︎\n   ","wordCount":"1820","inLanguage":"en","datePublished":"2020-05-05T00:00:01Z","dateModified":"2020-05-05T00:00:01Z","author":{"@type":"Person","name":"sachin0x18"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://sachin0x18.github.io/posts/demystifying-xtensa-isa/"},"publisher":{"@type":"Organization","name":"/dev/null","logo":{"@type":"ImageObject","url":"https://sachin0x18.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=https://sachin0x18.github.io/ accesskey=h title="/dev/null (Alt + H)">/dev/null</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
 </div>
-<footer class="footer">
-	<div class="social-icons">
-        
-    <a class="social-icon" href="mailto:sachin.parekh1811@gmail.com" target="_blank" rel="noopener" title="Email">
-        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
-            <path d="M25.2794292,5.59128519 L14,16.8707144 L2.72057081,5.59128519 C3.06733103,5.30237414 3.51336915,5.12857603 4,5.12857603 L24,5.12857603 C24.4866308,5.12857603 24.932669,5.30237414 25.2794292,5.59128519 Z M25.9956978,6.99633695 C25.998551,7.04004843 26,7.08414302 26,7.12857603 L26,20.871424 C26,21.0798433 25.9681197,21.2808166 25.9089697,21.4697335 L18.7156355,14.2763993 L25.9956978,6.99633695 Z M24.9498374,22.6319215 C24.6672737,22.7846939 24.3437653,22.871424 24,22.871424 L4,22.871424 C3.5268522,22.871424 3.09207889,22.7071233 2.74962118,22.432463 L10.0950247,15.0870594 L13.9848068,18.9768415 L14.1878486,18.7737996 L14.2030419,18.7889929 L17.6549753,15.3370594 L24.9498374,22.6319215 Z M2.00810114,21.0526627 C2.00273908,20.9929669 2,20.9325153 2,20.871424 L2,7.12857603 C2,7.08414302 2.00144896,7.04004843 2.00430222,6.99633695 L9.03436454,14.0263993 L2.00810114,21.0526627 Z"></path>
-        </svg>
-    </a>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-    
-    <a class="social-icon" href="https://github.com/sachin0x18" target="_blank" rel="noopener" title="GitHub">
-        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
-            <path d="M13.9988029,1.32087331 C6.82105037,1.32087331 1,7.14112562 1,14.3212723 C1,20.0649109 4.72454649,24.9370678 9.89038951,26.6560892 C10.5408085,26.7757983 10.7778323,26.374374 10.7778323,26.0296121 C10.7778323,25.7215609 10.7666595,24.9035493 10.760275,23.8189856 C7.14426471,24.6042767 6.38131925,22.0760223 6.38131925,22.0760223 C5.78995672,20.5740732 4.93762853,20.1742451 4.93762853,20.1742451 C3.75729765,19.3682044 5.02701126,19.3841656 5.02701126,19.3841656 C6.33183953,19.4759425 7.01817121,20.7241085 7.01817121,20.7241085 C8.17775254,22.7104801 10.0611744,22.1366749 10.8017741,21.8038838 C10.919887,20.9643246 11.2558703,20.3913175 11.6269683,20.066507 C8.74038491,19.7385043 5.70536235,18.6228163 5.70536235,13.6413251 C5.70536235,12.2223743 6.21213051,11.0611968 7.04370914,10.1530044 C6.90963504,9.82420367 6.46351945,8.50181809 7.17139875,6.71256734 C7.17139875,6.71256734 8.26234691,6.36301702 10.7459099,8.04532771 C11.78259,7.75642995 12.8950858,7.61277914 14.000399,7.60719272 C15.1049142,7.61277914 16.2166119,7.75642995 17.2548881,8.04532771 C19.736855,6.36301702 20.8262071,6.71256734 20.8262071,6.71256734 C21.5356825,8.50181809 21.0895669,9.82420367 20.9562909,10.1530044 C21.7894656,11.0611968 22.2922435,12.2223743 22.2922435,13.6413251 C22.2922435,18.6355852 19.2524325,19.734514 16.3570705,20.0561322 C16.8231376,20.4575564 17.2389269,21.2508282 17.2389269,22.4638795 C17.2389269,24.2012564 17.2229657,25.603448 17.2229657,26.0296121 C17.2229657,26.3775663 17.4575954,26.7821827 18.116793,26.6552912 C23.2786458,24.9322794 27,20.0633148 27,14.3212723 C27,7.14112562 21.1789496,1.32087331 13.9988029,1.32087331"></path>
-        </svg>
-    </a>
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-</div>
-
-
-
-
-	<p><a href="https://github.com/kimcc/hugo-theme-noteworthy" target="_blank" rel="noopener">Noteworthy theme</a></p>
-	<p><a href="https://gohugo.io" target="_blank" rel="noopener">Built with Hugo</a></p>
-
-	<script src="https://sachin0x18.github.io/js/main.min.fa5c2b23e07b5d9bfad267a52b4b24fdb053e6fb7524993383594926a3ac270c.js" integrity="sha256-+lwrI+B7XZv60melK0sk/bBT5vt1JJkzg1lJJqOsJww=" crossorigin="anonymous"></script>
-</footer>
-<p class="copyright"><a style='text-decoration: none; color: #ababab; 'rel='license' href='http://creativecommons.org/licenses/by/4.0/'> © sachin0x18 2020 </a></p>
+<ul id=menu>
+<li>
+<a href=https://sachin0x18.github.io/tags/ title=Tags>
+<span>Tags</span>
+</a>
+</li>
+</ul>
 </nav>
-
-        <div id="content" class="content-container">
-        
-
-<h1 class="post-title">Demystifying Xtensa ISA</h1>
-    
-    <time>May 5, 2020</time>
-    
-    <div>
-        <p>
-        
-
-<p><a href="https://en.wikipedia.org/wiki/Instruction_set_architecture">Instruction Set Architecture</a> (ISA) is considered to be esoteric even among software developers. I feel it&rsquo;s because majority of the developers don&rsquo;t even need to look at, let alone write code in assembly language (a language that has a direct correspondence to the ISA). It isn&rsquo;t their fault either, the compiler does the heavy lifting of converting the higher level language (generally ISA-agnostic) into its assembly equivalent.</p>
-
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<h1 class=post-title>
+Demystifying Xtensa ISA
+</h1>
+<div class=post-meta><span title="2020-05-05 00:00:01 +0000 UTC">May 5, 2020</span>&nbsp;·&nbsp;sachin0x18
+</div>
+</header>
+<div class=post-content><p><a href=https://en.wikipedia.org/wiki/Instruction_set_architecture>Instruction Set Architecture</a> (ISA) is considered to be esoteric even among software developers. I feel it&rsquo;s because majority of the developers don&rsquo;t even need to look at, let alone write code in assembly language (a language that has a direct correspondence to the ISA). It isn&rsquo;t their fault either, the compiler does the heavy lifting of converting the higher level language (generally ISA-agnostic) into its assembly equivalent.</p>
 <p>While the compiler does a great job in generating an (nearly) optimal assembly code, hand written assembly code dominates when programming performance critical routines, time critical interrupt handlers or interacting directly with the hardware. Certain architectures have some special DSP/MAC instructions that the compiler is unaware of, so DSP algorithms are also partially developed in assembly. Having a knowledge of the underlying architecture can, at times, help maximize the performance.</p>
-
 <blockquote>
-<p>Real programmers wrote in machine code<sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup></p>
+<p>Real programmers wrote in machine code<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup></p>
 </blockquote>
-
 <p>In this post, I will be covering certain sections of Xtensa ISA, specifically windowed registers, calling convention and stack layout.</p>
-
-<h2 id="overview-of-xtensa">Overview of Xtensa:</h2>
-
-<hr />
-
-<p>Xtensa is a post-RISC ISA<sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> i.e it derives most of its features from <a href="https://en.wikipedia.org/wiki/Reduced_instruction_set_computer">RISC</a> but also incorporates certain features where <a href="https://en.wikipedia.org/wiki/Complex_instruction_set_computer">CISC</a> is advantageous. Xtensa has 24-bit instructions (few are even 16 bits!), unlike the conventional 32-bit instructions, to have code compactness.</p>
-
-<h4 id="registers">Registers:</h4>
-
-<p>PC = Program Counter <br>
-AR = General purpose registers <br>
+<h2 id=overview-of-xtensa>Overview of Xtensa:<a hidden class=anchor aria-hidden=true href=#overview-of-xtensa>#</a></h2>
+<hr>
+<p>Xtensa is a post-RISC ISA<sup id=fnref:2><a href=#fn:2 class=footnote-ref role=doc-noteref>2</a></sup> i.e it derives most of its features from <a href=https://en.wikipedia.org/wiki/Reduced_instruction_set_computer>RISC</a> but also incorporates certain features where <a href=https://en.wikipedia.org/wiki/Complex_instruction_set_computer>CISC</a> is advantageous. Xtensa has 24-bit instructions (few are even 16 bits!), unlike the conventional 32-bit instructions, to have code compactness.</p>
+<h4 id=registers>Registers:<a hidden class=anchor aria-hidden=true href=#registers>#</a></h4>
+<p>PC = Program Counter<br>
+AR = General purpose registers<br>
 SAR = Shifts and the Shift Amount Register</p>
-
-<p>PC essentially holds the address which is going to be executed.</p>
-
-<p>AR is general purpose registers, there are 64 32-bit registers however only 16 of them are visible/accessible at a time. This is windowed register.</p>
-
-<p>SAR register holds the shift amount required for shift instructions (logical left, logical right). Xtensa does not provide single-instruction shifts in which the shift amount is in general register (ar) operand. The shift amount is in SAR register.</p>
-
-<h2 id="windowed-register">Windowed Register:</h2>
-
-<hr />
-
-<p><a href="https://en.wikipedia.org/wiki/Processor_register">General purpose registers</a> (GPR) are used to store data temporarily for CPU while performing various operations. These registers are blazing fast but are limited in number (8 ~ 32).</p>
-
-<p>Typically, the number of registers present in the <a href="https://en.wikipedia.org/wiki/Register_file">register file</a> are equal to the registers <em>directly</em> accessible by the core. The Xtensa core can only access 16 GPR, namely <code>a0</code> - <code>a15</code>. So the register file contains 16 registers.</p>
-
+<p><code>PC</code> essentially holds the address which is going to be executed.</p>
+<p><code>AR</code> is general purpose registers, there are 64 32-bit registers however only 16 of them are visible/accessible at a time. This is windowed register.</p>
+<p><code>SAR</code> register holds the shift amount required for shift instructions (logical left, logical right). Xtensa does not provide single-instruction shifts in which the shift amount is in general register (ar) operand. The shift amount is in SAR register.</p>
+<h2 id=windowed-register>Windowed Register:<a hidden class=anchor aria-hidden=true href=#windowed-register>#</a></h2>
+<hr>
+<p><a href=https://en.wikipedia.org/wiki/Processor_register>General purpose registers</a> (GPR) are used to store data temporarily for CPU while performing various operations. These registers are blazing fast but are limited in number (8 ~ 32).</p>
+<p>Typically, the number of registers present in the <a href=https://en.wikipedia.org/wiki/Register_file>register file</a> are equal to the registers <em>directly</em> accessible by the core. The Xtensa core can only access 16 GPR, namely <code>a0</code> - <code>a15</code>. So the register file contains 16 registers.</p>
 <p>Xtensa also has a Windowed register option, which when enabled, extends this register file to contain 64 registers. Essentially, the register frame (a0 - a15) acts as a window, through which only 16 registers are visible, that slides on this large register file having 64 registers. And hence the name: Windowed register.</p>
-
-<p>Which 16 registers are visible is controlled by the <code>WindowBase</code> register. WindowBase register indicates where the window starts in the register file. Also, the shifting/rotation of this window occurs in units of 4. That means, the window starts at <strong><code>(WindowBase x 4)</code></strong><sup><strong>th</strong></sup> position in the register file</p>
-
-<p><img src="/img/Windowed_register.png" alt="Windowed register" />
-<figcaption> <em>Fig 1. Register window</em> </figcaption></p>
-
-<p>So&hellip;how is this helpful ?</p>
-
+<p>Which 16 registers are visible is controlled by the <code>WindowBase</code> register. WindowBase register indicates where the window starts in the register file. Also, the shifting/rotation of this window occurs in units of 4. That means, the window starts at <strong><code>(WindowBase x 4)</code></strong><strong>th</strong> position in the register file</p>
+<p><img loading=lazy src=/img/Windowed_register.png alt="Windowed register">
+</p>
+<p>So&mldr;how is this helpful ?</p>
 <p>The answer lies in function calls and for that we will have to understand the calling convention.</p>
-
-<h2 id="calling-convention">Calling convention:</h2>
-
-<hr />
-
-<p>Applications are often broken down into various functions/subroutines for reusability, maintainability and scaleability. Each subroutine can have its own set of arguments, local variables and a return type. In practice, there are many such subroutines and nested subroutines, so how should we pass arguments to a subroutine ? What happens to the parameters/context of the caller subroutine ? <br>
-To answer these questions and various other questions, the architecture defines an <a href="https://en.wikipedia.org/wiki/Application_binary_interface">application binary interface (ABI)</a> which also includes the calling convention.</p>
-
-<p><a href="https://en.wikipedia.org/wiki/Calling_convention">Calling convention</a> is basically a set of protocol that delineates how arguments are passed to a function, how the stack is managed inside the function, how is data returned to the caller and some more intricacies.</p>
-
-<p>Xtensa supports two different ABIs.<br>
-1. Windowed register ABI <br>
-2. Call0 ABI</p>
-
+<h2 id=calling-convention>Calling convention:<a hidden class=anchor aria-hidden=true href=#calling-convention>#</a></h2>
+<hr>
+<p>Applications are often broken down into various functions/subroutines for reusability, maintainability and scaleability. Each subroutine can have its own set of arguments, local variables and a return type. In practice, there are many such subroutines and nested subroutines, so how should we pass arguments to a subroutine ? What happens to the parameters/context of the caller subroutine ?
+To answer these questions and various other questions, the architecture defines an <a href=https://en.wikipedia.org/wiki/Application_binary_interface>application binary interface (ABI)</a> which also includes the calling convention.</p>
+<p><a href=https://en.wikipedia.org/wiki/Calling_convention>Calling convention</a> is basically a set of protocol that delineates how arguments are passed to a function, how the stack is managed inside the function, how is data returned to the caller and some more intricacies.</p>
+<p>Xtensa supports two different ABIs.</p>
+<ol>
+<li>Windowed register ABI </li>
+<li>Call0 ABI</li>
+</ol>
 <p>I will cover only Windowed register ABI.</p>
-
-<h3 id="windowed-register-calling-convention">Windowed register calling convention:</h3>
-
+<h3 id=windowed-register-calling-convention>Windowed register calling convention:<a hidden class=anchor aria-hidden=true href=#windowed-register-calling-convention>#</a></h3>
 <p>Return address is stored in <code>a0</code> and the stack pointer is store in <code>a1</code></p>
-
 <p>Arguments to the functions are passed in both, registers and memory (stack). The first six arguments are passed in the registers and remaining go on the stack.</p>
-
 <p>As for return values, they are returned in registers beginning from <code>a2</code> till <code>a5</code>. If there are more than 4 values to be returned, the caller passes a pointer which is then populated by callee with all the return values.</p>
-
 <table>
 <thead>
 <tr>
-<th align="center">Register</th>
-<th align="center">Use</th>
+<th style=text-align:center>Register</th>
+<th style=text-align:center>Use</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
-<td align="center">a0</td>
-<td align="center">Return address</td>
+<td style=text-align:center>a0</td>
+<td style=text-align:center>Return address</td>
 </tr>
-
 <tr>
-<td align="center">a1</td>
-<td align="center">Stack pointer</td>
+<td style=text-align:center>a1</td>
+<td style=text-align:center>Stack pointer</td>
 </tr>
-
 <tr>
-<td align="center">a2 - a7</td>
-<td align="center">Incoming arguments</td>
+<td style=text-align:center>a2 - a7</td>
+<td style=text-align:center>Incoming arguments</td>
 </tr>
 </tbody>
 </table>
-
 <p>In Xtensa, subroutine calls are initiated using <code>CALLN</code> and <code>CALLXN</code> instructions. N is the windowed register option that specifies the amount by which the register window needs to be rotated for the callee. N can take values from 0, 4, 8 and 12. (call0/callx0 does not follow windowed register convention so further explanation does not apply for N = 0)</p>
-
 <p>What does &ldquo;rotation of window for the callee&rdquo; exactly mean ?</p>
-
 <p>When a subroutine is called using callN/callxN, WindowBase register is incremented by (N/4), so the registers visible when inside callee, through the window, would be different from caller because the register frame (a0 - a15) would have moved.</p>
-
 <p>In general, for a windowed register call <code>callN</code>/<code>callxN</code></p>
-
-<pre><code>aN of caller will be a0 of callee
+<pre tabindex=0><code>aN of caller will be a0 of callee
 a(N+1) of caller will be a1 of callee and so on…
-</code></pre>
-
-<p>So the caller needs to put the first argument of the callee in a(N+2), second in a(N+3) and so on..</p>
-
+</code></pre><p>So the caller needs to put the first argument of the callee in a(N+2), second in a(N+3) and so on..</p>
 <p>While returning from the callee function, WindowBase register is decremented by (N/4) to keep the caller function registers same.</p>
-
 <p>Let&rsquo;s take an example:</p>
-
-<pre><code>/*
+<pre tabindex=0><code>/*
  * void func(a,b)
  * {
  *     ...
@@ -274,225 +152,93 @@ func:
     call8       bar	
     mov         foo, a10  // a10 is bar’s a2 (return value)
     ...
-</code></pre>
-
-<p>Do you see the advantage of using windowed registers ? <br>
+</code></pre><p>Do you see the advantage of using windowed registers ?
 When a function calls another function, it does not have to store its own arguments somewhere else to accomodate the arguments for the callee since the arguments of the callee is at a different <em>physical</em> location. The callee function internally will still use <code>a2</code> to access its first argument but as you can see, <code>a2</code> of the caller is at a different physical location than <code>a2</code> of callee. If there was no windowing and the number of physical registers would be exactly 16 then <code>a2</code> of caller and callee would be same. Thus for each function call, the data in these registers would have to be stored at some other memory location (stack) before calling any function and restore again after returning.</p>
-
 <p>Accessing any memory location, other than register, is very slow and as a result this saving/restoring will have a negative impact on performance. So using windowed register convention saves us the overhead of such stores/restores and also reduces the code size.</p>
-
 <p>With that said, few questions pop up in my head</p>
-
 <ul>
 <li>What happens when there is a function that calls another function that calls another and so on such that the window keeps on rotating and wraps around pointing to the first function&rsquo;s frame ?</li>
 <li>Does it overwrite the data and corrupt the first function’s data ?</li>
 <li>If not, then where is the first function&rsquo;s data stored ?</li>
 </ul>
-
 <p>When the program tries to write to a register that already has the data of one of the parent routine, a window overflow exception is generated and it&rsquo;s the responsibilty of the window overflow exception handler to ensure that the data in the overlapped registers is saved on the stack before it gets overwritten.</p>
-
 <p>And where exactly is the data in these registers stored on the stack ?</p>
-
 <p>For that, let&rsquo;s see how the stack is laid out.</p>
-
-<h2 id="stack-layout">Stack Layout:</h2>
-
-<hr />
-
-<p>As mentioned, the stack pointer resides in <code>a1</code> register. This stack pointer always points to the <strong>bottom</strong> of the stack!<br></p>
-
-<p>Usually, <a href="https://en.wikipedia.org/wiki/Function_prologue">function prologue</a> sets up the stack for a function.</p>
-
+<h2 id=stack-layout>Stack Layout:<a hidden class=anchor aria-hidden=true href=#stack-layout>#</a></h2>
+<hr>
+<p>As mentioned, the stack pointer resides in <code>a1</code> register. This stack pointer always points to the <strong>bottom</strong> of the stack!</p>
+<p>Usually, <a href=https://en.wikipedia.org/wiki/Function_prologue>function prologue</a> sets up the stack for a function.</p>
 <p>In Xtensa, <code>ENTRY</code> instruction is the function prologue</p>
-
-<p>ENTRY instruction primarily does two things: <br>
-1. Allocates the stack frame for the function and sets the stack pointer. <br>
-2. Moves/rotates the register window by n as specified in the calln/callxn instruction.</p>
-
+<p>ENTRY instruction primarily does two things: </p>
+<ol>
+<li>Allocates the stack frame for the function and sets the stack pointer. </li>
+<li>Moves/rotates the register window by n as specified in the calln/callxn instruction.</li>
+</ol>
 <p>Stack layout is always better explained through an illustration</p>
-
-<p><img src="/img/Stack_layout.png" alt="Windowed ABI stack layout" />
-<figcaption> <em>Fig 2. Windowed ABI stack layout</em> </figcaption></p>
-
+<p><img loading=lazy src=/img/Stack_layout.png alt="Windowed ABI stack layout">
+</p>
 <blockquote>
 <p>For clarity, I will use sp as stack pointer instead of a1.</p>
 </blockquote>
-
 <p>Like most architectures, in Xtensa too, stack grows downwards. If there are outgoing arguments, apart from the first 6 arguments, then they will go on the positive offset from sp. i.e 7th argument on <code>sp</code>, 8th on <code>sp + 4</code> and so on. Above the outgoing arguments, local variables of that function are stored.</p>
-
 <p>The region underneath the stack pointer, called <code>Base Save Area</code>, is of 16 bytes and reserved for saving the <code>a0</code> - <code>a3</code> of the caller (previous frame) when the window overflow exception occurs. If more registers of the caller are required to be saved then it is stored in the <code>Extra Save Area</code> at the top of the caller (previous) stack frame. The location of saving registers of the caller (i-1) frame is highlighed in the image.</p>
-
 <p>With all the necessary points covered, let&rsquo;s take an example and connect all the dots.</p>
-
 <p>Suppose, each function call is carried out using <code>call8</code> and we start with WindowBase = 4</p>
-
-<p>Function A calls B, B calls C, C calls D&hellip; till I <br>
+<p>Function A calls B, B calls C, C calls D&mldr; till I
 i.e</p>
-
-<pre><code>Functions:  A -&gt; B -&gt; C -&gt; D -&gt; E -&gt; F -&gt; G -&gt; H -&gt; I
+<pre tabindex=0><code>Functions:  A -&gt; B -&gt; C -&gt; D -&gt; E -&gt; F -&gt; G -&gt; H -&gt; I
 WindowBase: 4    6    8    10   12   14   0    2    4
-</code></pre>
-
-<p>On each function call, the WindowBase will be incremented by 2 because <code>call8</code> is used.</p>
-
-<p>No. of bits in WindowBase register = log<sub>2</sub>((No. of registers in register file)/4) = log<sub>2</sub>(<sup>64</sup>&frasl;<sub>4</sub>) = 4. Thus the max value of WindowBase is 15.</p>
-
+</code></pre><p>On each function call, the WindowBase will be incremented by 2 because <code>call8</code> is used.</p>
+<p>No. of bits in WindowBase register = log2((No. of registers in register file)/4) = log2(64/4) = 4. Thus the max value of WindowBase is 15.</p>
 <p>As you have noticed, on the 9th function call the window wraps around to a point where the frame contains the data of a parent function, i.e <code>a0</code>,<code>a1</code>.. contains data of <strong>A</strong>. It implies that <code>a8</code>,<code>a9</code>.. of <strong>H</strong> are <code>a0</code>,<code>a1</code>.. of <strong>A</strong>.</p>
-
 <p>A window overflow exception will be generated when <strong>H</strong> tries to modify <code>a8</code>,<code>a9</code>.. since it originally contains the context of <strong>A</strong>, so these must be saved to accommodate arguments of <strong>I</strong>. At this point, in the window overflow exception handler we must rotate the register window to frame <strong>A</strong> (<code>WindowBase = 4</code>).</p>
-
 <ul>
 <li><code>a0</code> - <code>a3</code> are stored in the <code>Base Save Area</code> of <strong>B</strong>&rsquo;s stack frame. <strong>B</strong>&rsquo;s stack frame is accessible since <code>a9</code> is <code>a1</code> of <strong>B</strong>, which is <strong>B</strong>&rsquo;s stack pointer.</li>
 <li><code>a4</code> - <code>a7</code> are stored in the <code>Extra Save Area</code> of <strong>A</strong>&rsquo;s stack frame.</li>
 </ul>
-
 <p>Now whenever <strong>B</strong> returns, window underflow exception will be generated and we need to make sure that the corresponding exception handler would restore these values back into the registers.</p>
-
 <p>I hope now you have some basic understanding of the Xtensa ISA, especially the windowed register ABI. There are some aspects of the windowed register ABI which I have simplified. If you want to delve deeper, refer to the Xtensa ISA reference manual.</p>
-
 <p>Thanks for reading!</p>
-<div class="footnotes">
-
-<hr />
-
+<section class=footnotes role=doc-endnotes>
+<hr>
 <ol>
-<li id="fn:1"><a href="https://www.cs.utah.edu/~elb/folklore/mel-annotated/node1.html#SECTION00010000000000000000">The Story of Mel</a>
- <a class="footnote-return" href="#fnref:1"><sup>↩</sup></a></li>
-<li id="fn:2"><a href="https://0x04.net/~mwk/doc/xtensa.pdf">Xtensa ISA: Reference Manual</a>
- <a class="footnote-return" href="#fnref:2"><sup>↩</sup></a></li>
+<li id=fn:1 role=doc-endnote>
+<p><a href=https://www.cs.utah.edu/~elb/folklore/mel-annotated/node1.html#SECTION00010000000000000000>The Story of Mel</a>&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
+<li id=fn:2 role=doc-endnote>
+<p><a href=https://0x04.net/~mwk/doc/xtensa.pdf>Xtensa ISA: Reference Manual</a>&#160;<a href=#fnref:2 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
 </ol>
+</section>
 </div>
-
-        </p>
-    </div>
-    <div id="disqus_thread"></div>
-<script type="application/javascript">
-    var disqus_config = function () {
-    
-    
-    
-    };
-    (function() {
-        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
-            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
-            return;
-        }
-        var d = document, s = d.createElement('script'); s.async = true;
-        s.src = '//' + "https-sachin0x18-github-io" + '.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-    
-
-    <div class="page-footer">
-        
-        <hr class="footer-divider">
-        
-            <a class="tag" href="/tags/xtensa">#Xtensa</a>
-        
-            <a class="tag" href="/tags/isa">#ISA</a>
-        
-            <a class="tag" href="/tags/windowed-register">#Windowed register</a>
-        
-            <a class="tag" href="/tags/calling-convention">#Calling convention</a>
-        
-            <a class="tag" href="/tags/espressif">#Espressif</a>
-        
-      
-    </div>
-
-
-        
-
-<link rel="stylesheet" type="text/css" href="/css/katex.min.css" crossorigin="anonymous">
-<script type="text/javascript" src="/js/katex.min.js" crossorigin="anonymous"></script>
-<script type="text/javascript" src="/js/auto-render.min.js"onload="renderMathInElement(document.body);" crossorigin="anonymous"></script>
-
-        </div>
-        <footer class="footer-mobile">
-	<div class="social-icons">
-        
-    <a class="social-icon" href="mailto:sachin.parekh1811@gmail.com" target="_blank" rel="noopener" title="Email">
-        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
-            <path d="M25.2794292,5.59128519 L14,16.8707144 L2.72057081,5.59128519 C3.06733103,5.30237414 3.51336915,5.12857603 4,5.12857603 L24,5.12857603 C24.4866308,5.12857603 24.932669,5.30237414 25.2794292,5.59128519 Z M25.9956978,6.99633695 C25.998551,7.04004843 26,7.08414302 26,7.12857603 L26,20.871424 C26,21.0798433 25.9681197,21.2808166 25.9089697,21.4697335 L18.7156355,14.2763993 L25.9956978,6.99633695 Z M24.9498374,22.6319215 C24.6672737,22.7846939 24.3437653,22.871424 24,22.871424 L4,22.871424 C3.5268522,22.871424 3.09207889,22.7071233 2.74962118,22.432463 L10.0950247,15.0870594 L13.9848068,18.9768415 L14.1878486,18.7737996 L14.2030419,18.7889929 L17.6549753,15.3370594 L24.9498374,22.6319215 Z M2.00810114,21.0526627 C2.00273908,20.9929669 2,20.9325153 2,20.871424 L2,7.12857603 C2,7.08414302 2.00144896,7.04004843 2.00430222,6.99633695 L9.03436454,14.0263993 L2.00810114,21.0526627 Z"></path>
-        </svg>
-    </a>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-    
-    <a class="social-icon" href="https://github.com/sachin0x18" target="_blank" rel="noopener" title="GitHub">
-        <svg width="28px" height="28px" viewBox="0 0 28 28" version="1.1" fill="#ABABAB" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
-            <path d="M13.9988029,1.32087331 C6.82105037,1.32087331 1,7.14112562 1,14.3212723 C1,20.0649109 4.72454649,24.9370678 9.89038951,26.6560892 C10.5408085,26.7757983 10.7778323,26.374374 10.7778323,26.0296121 C10.7778323,25.7215609 10.7666595,24.9035493 10.760275,23.8189856 C7.14426471,24.6042767 6.38131925,22.0760223 6.38131925,22.0760223 C5.78995672,20.5740732 4.93762853,20.1742451 4.93762853,20.1742451 C3.75729765,19.3682044 5.02701126,19.3841656 5.02701126,19.3841656 C6.33183953,19.4759425 7.01817121,20.7241085 7.01817121,20.7241085 C8.17775254,22.7104801 10.0611744,22.1366749 10.8017741,21.8038838 C10.919887,20.9643246 11.2558703,20.3913175 11.6269683,20.066507 C8.74038491,19.7385043 5.70536235,18.6228163 5.70536235,13.6413251 C5.70536235,12.2223743 6.21213051,11.0611968 7.04370914,10.1530044 C6.90963504,9.82420367 6.46351945,8.50181809 7.17139875,6.71256734 C7.17139875,6.71256734 8.26234691,6.36301702 10.7459099,8.04532771 C11.78259,7.75642995 12.8950858,7.61277914 14.000399,7.60719272 C15.1049142,7.61277914 16.2166119,7.75642995 17.2548881,8.04532771 C19.736855,6.36301702 20.8262071,6.71256734 20.8262071,6.71256734 C21.5356825,8.50181809 21.0895669,9.82420367 20.9562909,10.1530044 C21.7894656,11.0611968 22.2922435,12.2223743 22.2922435,13.6413251 C22.2922435,18.6355852 19.2524325,19.734514 16.3570705,20.0561322 C16.8231376,20.4575564 17.2389269,21.2508282 17.2389269,22.4638795 C17.2389269,24.2012564 17.2229657,25.603448 17.2229657,26.0296121 C17.2229657,26.3775663 17.4575954,26.7821827 18.116793,26.6552912 C23.2786458,24.9322794 27,20.0633148 27,14.3212723 C27,7.14112562 21.1789496,1.32087331 13.9988029,1.32087331"></path>
-        </svg>
-    </a>
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
+<footer class=post-footer>
+<ul class=post-tags>
+<li><a href=https://sachin0x18.github.io/tags/xtensa/>Xtensa</a></li>
+<li><a href=https://sachin0x18.github.io/tags/isa/>ISA</a></li>
+<li><a href=https://sachin0x18.github.io/tags/windowed-register/>Windowed register</a></li>
+<li><a href=https://sachin0x18.github.io/tags/calling-convention/>Calling convention</a></li>
+<li><a href=https://sachin0x18.github.io/tags/espressif/>Espressif</a></li>
+</ul>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share Demystifying Xtensa ISA on twitter" href="https://twitter.com/intent/tweet/?text=Demystifying%20Xtensa%20ISA&url=https%3a%2f%2fsachin0x18.github.io%2fposts%2fdemystifying-xtensa-isa%2f&hashtags=Xtensa%2cISA%2cWindowedregister%2cCallingconvention%2cEspressif"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Demystifying Xtensa ISA on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fsachin0x18.github.io%2fposts%2fdemystifying-xtensa-isa%2f&title=Demystifying%20Xtensa%20ISA&summary=Demystifying%20Xtensa%20ISA&source=https%3a%2f%2fsachin0x18.github.io%2fposts%2fdemystifying-xtensa-isa%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Demystifying Xtensa ISA on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fsachin0x18.github.io%2fposts%2fdemystifying-xtensa-isa%2f&title=Demystifying%20Xtensa%20ISA"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Demystifying Xtensa ISA on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fsachin0x18.github.io%2fposts%2fdemystifying-xtensa-isa%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
 </div>
-
-
-
-
-	<div class="footer-mobile-links">
-		<p><a href="https://github.com/kimcc/hugo-theme-noteworthy" target="_blank" rel="noopener">Noteworthy theme</a></p>
-		<span class="divider-bar">|</span>
-		<p><a href="https://gohugo.io" target="_blank" rel="noopener">Built with Hugo</a></p>
-	</div>
-
-	<script src="https://sachin0x18.github.io/js/main.min.fa5c2b23e07b5d9bfad267a52b4b24fdb053e6fb7524993383594926a3ac270c.js" integrity="sha256-+lwrI+B7XZv60melK0sk/bBT5vt1JJkzg1lJJqOsJww=" crossorigin="anonymous"></script>
 </footer>
-    </body>
+</article>
+</main>
+<footer class=footer>
+<span>&copy 2020-2022 sachin0x18</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
 </html>

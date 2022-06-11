@@ -1,1 +1,3 @@
 User-agent: *
+Disallow:
+Sitemap: https://sachin0x18.github.io/sitemap.xml
